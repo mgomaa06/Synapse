@@ -25,6 +25,8 @@ class ImageMetadata(BaseModel):
 async def create_upload_file(file: UploadFile, response = ImageMetadata):
     if file.content_type != "image/jpeg" and file.content_type != "image/png":
         raise HTTPException(status_code=400, detail= "invalid image file")
+    if file.size == 0:
+        raise HTTPException(status_code = 401, detail= "empty file")
     image = Image.open(file.file)
     width, height = image.size
     return {"filename": file.filename,
