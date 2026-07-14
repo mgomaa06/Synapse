@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, HTTPException
 from PIL import Image
 from pydantic import BaseModel
 
@@ -23,14 +23,13 @@ class ImageMetadata(BaseModel):
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile, response = ImageMetadata):
-    if file.content_type == "image/jpeg" or file.content_type == "image/png":
-        image = Image.open(file.file)
-        width, height = image.size
-        return {"filename": file.filename,
+    if file.content_type != "image/jpeg" and file.content_type != "image/png":
+        raise HTTPException(status_code=400, detail= "invalid image file")
+    image = Image.open(file.file)
+    width, height = image.size
+    return {"filename": file.filename,
                 "height": height,
                 "width": width}
-    else:
-        return "invalid file type"
 
 
 if __name__ == "__main__":
