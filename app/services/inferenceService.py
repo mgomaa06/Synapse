@@ -1,6 +1,7 @@
 from fastapi import HTTPException, UploadFile
 from PIL import Image, UnidentifiedImageError
-
+from torchvision import transforms
+from torchvision.transforms import InterpolationMode
 from io import BytesIO
 import torch
 
@@ -8,10 +9,20 @@ from torchvision.models import (MobileNet_V3_Large_Weights, mobilenet_v3_large)
 
 from app.models.inference import InferenceResponse
 
-WEIGHTS = MobileNet_V3_Large_Weights.DEFAULT
+WEIGHTS = MobileNet_V3_Large_Weights.IMAGENET1K_V2
 model = mobilenet_v3_large(weights = WEIGHTS)
 model.eval()
-PREPROCESS = WEIGHTS.transforms()
+PREPROCESS = transforms.Compose(
+    [
+        transforms.Resize(232, interpolation=InterpolationMode.BILINEAR),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean = [0.485, 0.456, 0.406],
+            std = [0.229, 0.224, 0.225]
+        )
+    ]
+)
 CATEGORIES = WEIGHTS.meta["categories"]
 
 def predict_image(image_bytes: bytes) -> tuple[str, float]:
