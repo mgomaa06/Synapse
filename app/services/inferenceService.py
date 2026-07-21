@@ -21,7 +21,7 @@ def predict_image(image_bytes: bytes) -> tuple[str, float]:
             input_tensor = PREPROCESS(image)
 
     except (UnidentifiedImageError, OSError) as exc:
-        raise InvalidImageError("The uploaded file contents are not a valid image.") from exc
+        raise InvalidImageError("This is not a valid image") from exc
 
     input_batch = input_tensor.unsqueeze(0)
 
